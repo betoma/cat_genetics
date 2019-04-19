@@ -2,15 +2,18 @@ import random
 
 class Cat(object):
     """ Cat class represents a single cat's genotype """
-    def __init__(self,sex="random",length="random",orange="random"):
+    def __init__(self,sex="random",length="random",orange="random",eumelanin="random",dilution="random"):
         """ Create a new cat with a given genotype """
-        self.Alleles = { 'sex_chrom' : set(), 'length' : set() }
+        self.Alleles = { 'sex_chrom' : set(), 'length' : set(), 'eumelanin' : set(), 'dilution' : set() }
         #---these constants allow for easy error handling---#
         VALID_SEX = {"male","female"}
         VALID_LENGTH = {"long","short"}
         VALID_ORANGE = {"red","black","tortie"}
+        VALID_EUMEL = {"black","chocolate","cinnamon"}
+        VALID_DILUTE = {"dilute","nondilute"}
         #--various allele constants--#
         LENGTH_ALLELES = {"L","l"}
+        DILUTE_ALLELES = {"D","d"}
         #---sex chromosomes (and sex-linked traits like orange)---#
         orange = decideTypes(orange,VALID_ORANGE)
         if sex == "male" and orange == "tortie":
@@ -46,6 +49,38 @@ class Cat(object):
             length2 = pickOne(LENGTH_ALLELES)
         self.Alleles['length'].add(length1)
         self.Alleles['length'].add(length2)
+        #---eumelanin density---#
+        eumelanin = decideTypes(length,VALID_EUMEL)
+        if eumelanin == "cinnamon":
+            eu1 = "bl"
+            eu2 = "bl"
+        else:
+            if eumelanin == "chocolate":
+                eu1 = "b"
+                eumel_alleles = {"bl","b"}
+                eu2 = pickOne(eumel_alleles)
+            else:
+                eumel_alleles = {"B","b","bl"}
+                eu1 = pickOne(eumel_alleles)
+                if eumelanin == "black":
+                    eu2 = "B"
+                else:
+                    eu2 = pickOne(eumel_alleles)
+        self.Alleles['eumelanin'].add(eu1)
+        self.Alleles['eumelanin'].add(eu2)
+        #---dilution---#
+        dilution = decideTypes(length,VALID_DILUTE)
+        if dilution == "dilute":
+            dil1 = "d"
+            dil2 = "d"
+        else:
+            if dilution == "nondilute":
+                dil1 = "D"
+            else:
+                dil1 = pickOne(DILUTE_ALLELES)
+            dil2 = pickOne(DILUTE_ALLELES)
+        self.Alleles['dilution'].add(dil1)
+        self.Alleles['dilution'].add(dil2)
 
 def pickOne(valid_items: set):
     chosenOne = random.choice(tuple(valid_items))
