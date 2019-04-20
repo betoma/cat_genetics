@@ -7,8 +7,8 @@ class Gene:
     MATRIX_RELATIONS = {"dom","rec","inc"}
 
     def __init__(self, dominance_type: str, alleles: list, *phenotypes: str, sex_chrom: bool=False, y_alleles: list=None, custom_matrix: list=None, y_trait_phenotypes: list=None, custom_male_matrix: list=None, complex_y_linked: bool=False, custom_y_linked_matrix: list=None, **assignments):
-        """ Create a new gene with alleles from a given list """
-        self.sex_chrome = sex_chrom
+        """ Create a new gene and establish its alleles and dominance patterns """
+        self.sex_chrom = sex_chrom
         self.allele_types = set(alleles)
         self.alleles = alleles
         self.phenotypes = phenotypes
@@ -31,8 +31,9 @@ class Gene:
                 self.dom_matrix.append(list())
             if sex_chrom:
                 if not y_alleles:
-                    raise ValueError("Gene: if sex_chrome is True, valid y_alleles must be provided")
+                    raise ValueError("Gene: if sex_chrom is True, valid y_alleles must be provided")
                 else:
+                    self.y_alleles = y_alleles
                     self.y_allele_types = set(y_alleles)
                     self.alt_allele_types = self.allele_types.union(self.y_allele_types)
                     if len(y_alleles) >= 1 and not y_trait_phenotypes:
@@ -54,6 +55,7 @@ class Gene:
                     else:
                         self.y_linked_matrix = None
             else:
+                self.y_alleles = None
                 self.y_allele_types = None
                 self.alt_allele_types = self.allele_types
                 self.male_matrix = None
@@ -78,6 +80,37 @@ class Gene:
             else:
                 raise ValueError("Gene: dominance type must be one of {}".format(Gene.VALID_DOM_TYPES))
 
+    def randomize(self, *args:int, sex_weight: int=None, y_weights: list=None):
+        """ Randomly select genotype from available options (with optional arguments for defining probability thresholds) """
+        if args:
+            arg_weights = [a for a in args]
+            gene1 = random.choices(self.alleles,weights=arg_weights)
+        else:
+            gene1 = random.choices(self.alleles)
+        if self.sex_chrom:
+            if sex_weight:
+                if random.randint(1,100) <= sex_weight:
+                    male = True
+                else:
+                    male = False
+            else:
+                male = random.choice([True,False])
+        else:
+            male = False
+        if male:
+            if y_weights:
+                gene2 = random.choices(self.y_alleles,weights=y_weights)
+            else:
+                gene2 = random.choices(self.y_alleles)
+        else:
+            if args:
+                gene2 = random.choices(self.alleles,weights=arg_weights)
+            else:
+                gene2 = random.choices(self.alleles)
+        self.genotype.add(gene1[0])
+        self.genotype.add(gene2[0])
+
 test = Gene("simple", ["L","l"], "long", "short")
+test.randomize()
 print(test.dom_matrix)
-print(test.inc_phenotypes)
+print(test.genotype)
