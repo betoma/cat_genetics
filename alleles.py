@@ -15,12 +15,15 @@ class Gene:
         self.genotype = set()
         self.simple_pheno_map = dict()
         no_of_alleles = len(alleles)
-        if len(phenotypes) > no_of_alleles:
+        no_of_phenotypes = len(phenotypes)
+        if no_of_phenotypes > no_of_alleles:
             self.inc_phenotypes = phenotypes[no_of_alleles:]
             self.inc_phenomap = dict()
+        elif no_of_alleles > no_of_phenotypes:
+            raise ValueError("Gene: must have at least as many phenotypes as alleles. {} alleles but only {} phenotypes.".format(no_of_alleles,no_of_phenotypes))
         else:
             self.inc_phenotypes = None
-            self.inc_phenomap = dict()
+            self.inc_phenomap = None
         for i,a in enumerate(alleles):
             self.simple_pheno_map[a] = phenotypes[i]
         if custom_matrix:
